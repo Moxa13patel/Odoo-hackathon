@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">Recent Questions</h2>
+
+  <!-- Search and Filter Bar -->
+  <form method="GET" action="{{ url_for('main.home') }}" class="mb-4">
+    <div class="input-group">
+      <input type="text" name="search_query" class="form-control" placeholder="Search questions by title or body..." value="{{ request.args.get('search_query', '') }}">
+      <input type="text" name="tag_filter" class="form-control" placeholder="Filter by tag (e.g., Python, Flask)" value="{{ request.args.get('tag_filter', '') }}">
+      <button type="submit" class="btn btn-outline-primary">Search</button>
+    </div>
+  </form>
+
+  {% for q in questions.items %} {# Iterate over items for pagination #}
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5 class="card-title"><a href="{{ url_for('main.question_detail', question_id=q.id) }}">{{ q.title }}</a></h5>
+        <div class="card-text">
+          {{ q.body | safe | truncate(200) }}
+        </div>
+        <div class="mt-2">
+          {% for tag in q.tags %}
+            <a href="{{ url_for('main.home', tag_filter=tag.name) }}" class="badge bg-secondary text-decoration-none me-1">{{ tag.name }}</a>
+          {% endfor %}
+        </div>
+        <small class="text-muted">Asked by {{ q.user.username }} on {{ q.timestamp.strftime('%Y-%m-%d') }}</small>
+        <div class="mt-3">
+          <a href="{{ url_for('main.question_detail', question_id=q.id) }}" class="btn btn-sm btn-info">View Question / Answer</a>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <p>No questions posted yet.</p>
+  {% endfor %}
+
+  <!-- Pagination Controls -->
+  <nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+      {% if questions.has_prev %}
+        <li class="page-item"><a class="page-link" href="{{ url_for('main.home', page=questions.prev_num, search_query=request.args.get('search_query', ''), tag_filter=request.args.get('tag_filter', '')) }}">Previous</a></li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Previous</span></li>
+      {% endif %}
+
+      {% for page_num in questions.iter_pages() %}
+        {% if page_num %}
+          {% if questions.page == page_num %}
+            <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+          {% else %}
+            <li class="page-item"><a class="page-link" href="{{ url_for('main.home', page=page_num, search_query=request.args.get('search_query', ''), tag_filter=request.args.get('tag_filter', '')) }}">{{ page_num }}</a></li>
+          {% endif %}
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">...</span></li>
+        {% endif %}
+      {% endfor %}
+
+      {% if questions.has_next %}
+        <li class="page-item"><a class="page-link" href="{{ url_for('main.home', page=questions.next_num, search_query=request.args.get('search_query', ''), tag_filter=request.args.get('tag_filter', '')) }}">Next</a></li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Next</span></li>
+      {% endif %}
+    </ul>
+  </nav>
+
+  <h3 class="mt-5 mb-4" id="unanswered-questions-section">Newest Unanswered Questions</h3>
+  {% if unanswered_questions %}
+    {% for q in unanswered_questions %}
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title"><a href="{{ url_for('main.question_detail', question_id=q.id) }}">{{ q.title }}</a></h5>
+          <div class="card-text">
+            {{ q.body | safe | truncate(200) }}
+          </div>
+          <div class="mt-2">
+            {% for tag in q.tags %}
+              <a href="{{ url_for('main.home', tag_filter=tag.name) }}" class="badge bg-secondary text-decoration-none me-1">{{ tag.name }}</a>
+            {% endfor %}
+          </div>
+          <small class="text-muted">Asked by {{ q.user.username }} on {{ q.timestamp.strftime('%Y-%m-%d') }}</small>
+          <div class="mt-3">
+            <a href="{{ url_for('main.question_detail', question_id=q.id) }}" class="btn btn-sm btn-success">Answer This Question</a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>No unanswered questions at the moment. Be the first to answer!</p>
+  {% endif %}
+
+</div>
+{% endblock %}
+

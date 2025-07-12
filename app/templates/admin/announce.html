@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Send Announcement</h2>
+<form method="POST">
+  {{ form.hidden_tag() }} {# This renders the CSRF token and other hidden fields #}
+  <div class="mb-3">
+    {{ form.message.label(class="form-label") }} {# Optional: Add label for message field #}
+    {{ form.message(class="form-control", rows=5, placeholder="Enter announcement...") }}
+  </div>
+  {{ form.submit(class="btn btn-primary") }}
+</form>
+{% endblock %}

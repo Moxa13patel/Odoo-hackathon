@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Admin Dashboard</h2>
+
+<h4>All Users</h4>
+<table class="table">
+  <thead><tr><th>Username</th><th>Points</th><th>Actions</th></tr></thead>
+  <tbody>
+    {% for user in users %}
+      <tr>
+        <td>{{ user.username }}</td>
+        <td>{{ user.points }}</td>
+        <td>
+          {# Change this line to check user.role #}
+          {% if user.role != 'admin' %}
+            <a href="{{ url_for('admin.ban_user', user_id=user.id) }}" class="btn btn-sm btn-danger">Ban</a>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h4>All Questions</h4>
+<table class="table">
+  <thead><tr><th>Title</th><th>User</th><th>Actions</th></tr></thead>
+  <tbody>
+    {% for q in questions %}
+      <tr>
+        <td>{{ q.title }}</td>
+        <td>{{ q.user.username }}</td>
+        <td>
+          <a href="{{ url_for('admin.delete_question', question_id=q.id) }}" class="btn btn-sm btn-outline-danger">Delete</a>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<a href="{{ url_for('admin.announce') }}" class="btn btn-warning">Send Announcement</a>
+{% endblock %}

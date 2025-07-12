@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2 class="mb-4">Browse Tags</h2>
+  <div class="row">
+    {% for tag, count in tags %}
+      <div class="col-md-3 mb-2">
+        <a href="{{ url_for('main.home', tag_filter=tag.name) }}" class="btn btn-outline-primary w-100">
+          {{ tag.name }} <span class="badge bg-secondary">{{ count }}</span>
+        </a>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}

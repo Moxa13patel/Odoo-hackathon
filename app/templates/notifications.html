@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mb-4">🔔 Notifications</h2>
+
+{% if notifications %}
+  <ul class="list-group">
+    {% for note in notifications %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          {{ note.message }}
+          <br>
+          <small class="text-muted">{{ note.timestamp.strftime('%Y-%m-%d %H:%M') }}</small>
+        </div>
+        {% if note.link %}
+          <a href="{{ note.link }}" class="btn btn-sm btn-outline-primary">View</a>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No notifications yet.</p>
+{% endif %}
+{% endblock %}
+

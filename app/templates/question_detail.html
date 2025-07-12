@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="mb-4">
+  <h2>{{ question.title }}</h2>
+  <p class="text-muted">
+    Asked by <strong><a href="{{ url_for('main.profile', user_id=question.user.id) }}">{{ question.user.username }}</a></strong> on {{ question.timestamp.strftime('%Y-%m-%d') }}
+  </p>
+
+  <div class="mb-3">
+    <div class="p-3 bg-light border rounded">
+      {{ question.body|safe }}
+    </div>
+    <div class="mt-2">
+      {% for tag in question.tags %}
+        <span class="badge bg-secondary">{{ tag.name }}</span>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<h4 class="mb-3">Answers ({{ question.answers|length }})</h4>
+
+{% for answer in question.answers %}
+  <div class="card mb-3">
+    <div class="card-body">
+      <p>{{ answer.body|safe }}</p>
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <span class="text-muted">by <strong><a href="{{ url_for('main.profile', user_id=answer.user.id) }}">{{ answer.user.username }}</a></strong></span>
+          {% if answer.is_accepted %}
+            <span class="badge bg-success">✔ Accepted</span>
+          {% endif %}
+        </div>
+
+        <div class="d-flex align-items-center">
+          {# Displaying the primary vote count (now upvotes_count) #}
+          <div class="text-center me-2">
+            <div class="fw-bold fs-5">{{ answer.display_vote_count }}</div> {# Changed from net_votes to display_vote_count #}
+            <small class="text-muted">({{ answer.upvotes_count }} up / {{ answer.downvotes_count }} down)</small>
+          </div>
+
+          {% if current_user.is_authenticated and current_user.id != answer.user.id %}
+            <a href="{{ url_for('main.vote', answer_id=answer.id, vote_type='up') }}" class="btn btn-outline-secondary btn-sm me-1 btn-arrow" title="Upvote">
+              <span class="arrow-up"></span>
+            </a>
+            <a href="{{ url_for('main.vote', answer_id=answer.id, vote_type='down') }}" class="btn btn-outline-secondary btn-sm me-2 btn-arrow" title="Downvote">
+              <span class="arrow-down"></span>
+            </a>
+          {% endif %}
+
+          {% if current_user.is_authenticated and current_user.id == question.user_id and not answer.is_accepted %}
+            <a href="{{ url_for('main.accept_answer', answer_id=answer.id) }}" class="btn btn-outline-success btn-sm">Accept</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endfor %}
+
+{% if current_user.is_authenticated %}
+  <div class="card mt-4">
+    <div class="card-body">
+      <h5>Submit Your Answer</h5>
+      <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <!-- Quill Editor for Answer Body -->
+        <div class="mb-3">
+          {{ form.body.label(class="form-label") }}
+          <div id="answer-editor" class="form-control" style="height: 150px;"></div>
+          <!-- Hidden field to capture Quill content -->
+          <input type="hidden" name="body" id="hidden_answer_body">
+        </div>
+
+        <div class="d-grid mt-3">
+          {{ form.submit(class="btn btn-primary") }}
+        </div>
+      </form>
+    </div>
+  </div>
+{% else %}
+  <p><a href="{{ url_for('main.login') }}">Login</a> to post an answer.</p>
+{% endif %}
+
+<!-- Quill Rich Text Editor CSS -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<!-- Quill Rich Text Editor JS -->
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script>
+  // Initialize Quill for the Answer Editor
+  const answerQuill = new Quill('#answer-editor', {
+    theme: 'snow',
+    placeholder: 'Type your answer here...',
+    modules: {
+      toolbar: [
+        [{ 'header': [1, 2, false] }],
+        ['bold', 'italic', 'strike'],
+        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+        ['link', 'image'],
+        [{ 'align': [] }],
+        ['clean']
+      ]
+    }
+  });
+
+  // Sync Quill content to hidden input before form submit for the Answer Form
+  const answerForm = document.querySelector('#hidden_answer_body').closest('form');
+  answerForm.addEventListener('submit', function () {
+    const hiddenAnswerBody = document.getElementById('hidden_answer_body');
+    hiddenAnswerBody.value = answerQuill.root.innerHTML;
+  });
+</script>
+{% endblock %}

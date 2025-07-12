@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mb-4">🏆 Leaderboard</h2>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Rank</th>
+      <th>User</th>
+      <th>Points</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for user in users %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td><a href="{{ url_for('main.profile', user_id=user.id) }}">{{ user.username }}</a></td> {# ADDED LINK HERE #}
+        <td>{{ user.points }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
